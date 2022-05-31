@@ -7,6 +7,7 @@
 #include <robot_design/types.h>
 #include <robot_design/utils.h>
 #include <stdexcept>
+#include <iostream>
 
 namespace robot_design {
 
@@ -490,6 +491,83 @@ bool BulletSimulation::robotHasCollision(Index robot_idx) const {
     }
   }
   return false;
+}
+
+//      int contact_count = manifold->getNumContacts();
+//      for (int j = 0; j < contact_count; ++j) {
+//        const btManifoldPoint &manifold_point = manifold->getContactPoint(j);
+//        if (manifold_point.getDistance() < 0) {
+//          // Bodies are intersecting
+//          return true;
+//        }
+//      }
+
+
+//            const btCollisionObject* objectA = static_cast<const btCollisionObject*>(manifold->getBody0());
+//            const btCollisionObject* objectB = static_cast<const btCollisionObject*>(manifold->getBody1());
+//
+//            // Note: the order of the objects A and B is arbitrary, but the contactPoint's normal
+//            // always points from objectB toward objectA, so we figure out which one is boxBody and
+//            // reverse the direction if the normal when boxBody is objectB.
+//            btRigidBody* otherBody = nullptr;
+//            btScalar sign = 1.0f;
+//            if (objectA->getUserPointer() == robot) {
+//                otherBody == static_cast<btRigidBody*>(objectB);
+//            } else if (objectB->getUserPointer() == robot) {
+//                otherBody == static_cast<btRigidBody*>(objectA);
+//                sign = -1.0f;
+//            }
+//
+//            if (otherBody) {
+//                btVector3 normal = sign * manifold->getContactPoint(0).m_normalWorldOnB;
+//                const btScalar UPWARD_NORMAL_THRESHOLD = 0.0f;
+//            }
+
+// This function should return the contact location of the robot with the ground
+// An interesting question to answer is what should be the sequence of the returned contact points
+void BulletSimulation::getRobotWorldContact(Index robot_idx, Ref<VectorX> loc) const {
+  const Robot *robot = robot_wrappers_[robot_idx].robot_.get();
+  int manifold_count = dispatcher_->getNumManifolds();
+  int n_contact = 8;
+  loc = VectorX::Zero(3*n_contact);
+  int counter = 0;
+  for (int i = 0; i < manifold_count; ++i) {
+    if (counter >= n_contact) {
+        break;
+    }
+    const btPersistentManifold *manifold =
+        dispatcher_->getManifoldByIndexInternal(i);
+    if (manifold->getBody0()->getUserPointer() == robot ||
+        manifold->getBody1()->getUserPointer() == robot) {
+        // std::cout << "collision detected\n";
+        // Contact involves exactly one of the robot's bodies
+        if (manifold->getNumContacts() > 0) {
+            // std::cout << "entered value assignment\n";
+            // in this part, we get the contact point of the manifold
+            const btManifoldPoint &manifold_point = manifold->getContactPoint(0);
+            btVector3 pos;
+            pos = manifold_point.getPositionWorldOnA();
+            Vector3 tmp_pos = eigenVector3FromBullet(pos);
+            //loc.head<3>() = eigenVector3FromBullet(pos);
+            for (int j = 0; j < 3; j++) {
+                loc[counter * 3 + j] = tmp_pos[j];
+            }
+            counter++;
+
+//            for(int i=0; i < loc.size(); i++)
+//                std::cout << loc[i] << ' ';
+//            std::cout << pos << '\n';
+//            btVector3 second_pos = manifold_point.getPositionWorldOnB();
+//            for(int i=0; i < 3; i++)
+//                std::cout << eigenVector3FromBullet(second_pos)[i] << ' ';
+//            std::cout << second_pos << '\n';
+            //return;
+            //things to test:
+            // location on A vs location on B, how many contact points, whether the location is correct
+        }
+    }
+  }
+  //std::cout << "end of function (no collision?)\n";
 }
 
 Scalar BulletSimulation::getTimeStep() const { return time_step_; }

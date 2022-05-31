@@ -39,6 +39,7 @@ void initSim(py::module &m) {
       .def("add_link_force_torque", &rd::Simulation::addLinkForceTorque)
       .def("get_robot_world_aabb", &rd::Simulation::getRobotWorldAABB)
       .def("robot_has_collision", &rd::Simulation::robotHasCollision)
+      .def("robot_world_contact", &rd::Simulation::getRobotWorldContact)
       .def("get_time_step", &rd::Simulation::getTimeStep)
       .def("get_gravity", &rd::Simulation::getGravity)
       .def("set_gravity", &rd::Simulation::setGravity)
