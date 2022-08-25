@@ -11,6 +11,7 @@ import random
 import signal
 import sys
 import tasks
+import pickle
 
 def get_applicable_matches(rule, graph):
   """Generates all applicable matches for rule in graph."""
@@ -255,7 +256,7 @@ def set_pdb_trace(sig, frame):
 
 def main():
   signal.signal(signal.SIGUSR1, set_pdb_trace)
-
+  import time
   parser = argparse.ArgumentParser(description="Robot design search demo.")
   parser.add_argument("task", type=str, help="Task (Python class name)")
   parser.add_argument("grammar_file", type=str, help="Grammar file (.dot)")
@@ -318,8 +319,15 @@ def main():
       writer.writeheader()
       log_file.flush()
 
+    global_start = time.time()
+    time_list = []
     for i in range(args.iterations):
       states, actions, result = search_alg.run_iteration()
+
+      cur_time = (time.time() - global_start) / 60
+      time_list.append(cur_time)
+      with open(os.path.join(args.log_dir, "time"), 'wb') as f:
+        pickle.dump(time_list, f)
 
       if i >= len(env.result_cache):
         rule_seq = [rules.index(rule) for rule in actions]

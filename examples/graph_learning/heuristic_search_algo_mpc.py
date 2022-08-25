@@ -228,9 +228,13 @@ def search_algo(args):
 
         # record prediction error
         prediction_error = []
-        
+
+        t_start = time.time()
+        time_list = []
+        time_save_path = os.path.join(args.save_dir, 'time')
+
         for epoch in range(args.num_iterations):
-            t_start = time.time()
+
 
             V.eval()
 
@@ -438,6 +442,12 @@ def search_algo(args):
                 print_info('#valid samples = {}, #invalid samples = {}, #valid / #invalid = {}'.format(num_valid_samples, num_invalid_samples, num_valid_samples / num_invalid_samples if num_invalid_samples > 0 else 10000.0))
                 print_info('Invalid samples: #no_action_samples = {}, #step_exceeded_samples = {}, #self_collision_samples = {}'.format(no_action_samples, step_exceeded_samples, self_collision_samples))
                 print_info('repeated rate = {}'.format(repeated_cnt / (epoch + 1)))
+
+            cur_time = (time.time() - t_start) / 60
+            time_list.append(cur_time)
+            with open(time_save_path, 'wb') as f:
+                pickle.dump(time_list, f)
+
 
         save_path = os.path.join(args.save_dir, 'model_state_dict_final.pt')
         torch.save(V.state_dict(), save_path)
