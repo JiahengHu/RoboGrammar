@@ -1,6 +1,6 @@
 # RoboGrammar
 
-This repo is adopted from \[[RoboGrammar](https://github.com/allanzhao/RoboGrammar.git)\] with modification, used for CoRL 22 submission on GLSO.
+This repo is adopted from \[[RoboGrammar](https://github.com/allanzhao/RoboGrammar.git)\] with modification, used for GLSO (CoRL 22).
 
 
 ## Prerequisites
@@ -26,7 +26,7 @@ sudo apt-get update
 
 ## Building (Linux, Mac OS)
 
-`git clone https://github.com/allanzhao/RoboGrammar.git`
+`git clone https://github.com/JiahengHu/RoboGrammar.git`
 
 `cd RoboGrammar`
 
