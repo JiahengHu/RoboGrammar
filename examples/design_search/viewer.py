@@ -102,6 +102,9 @@ def view_trajectory(sim, robot_idx, input_sequence, task):
   return viewer.camera_params, record_step_indices
 
 def finalize_robot(robot):
+
+  print("checking root joint")
+  print(robot.links[0].joint_type)
   for link in robot.links:
     link.label = ""
     link.joint_label = ""
@@ -248,11 +251,26 @@ def main():
             # Flip vertically, convert RGBA to BGR
             frame = viewer.render_array(main_sim)[::-1,:,2::-1]
             writer.write(frame)
+            # print("write!!")
 
     run_trajectory(main_sim, robot_idx, input_sequence, task,
                    write_frame_callback)
 
     writer.release()
+
+  ###################################
+  # get robot matrix representation #
+  ###################################
+  # from get_robot_data import Preprocessor
+  # all_labels = set()
+  # for rule in rules:
+  #   for node in rule.lhs.nodes:
+  #     all_labels.add(node.attrs.require_label)
+  # all_labels = sorted(list(all_labels))
+  # preprocessor = Preprocessor(all_labels=all_labels)
+  # adj_matrix_np, features_np, masks_np = preprocessor.preprocess(graph)
+  # print(adj_matrix_np.tolist())
+  # print(features_np.tolist())
 
 if __name__ == '__main__':
   main()

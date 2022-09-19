@@ -7,6 +7,7 @@
 #include <robot_design/types.h>
 #include <robot_design/utils.h>
 #include <stdexcept>
+#include <iostream>
 
 namespace robot_design {
 
@@ -490,6 +491,37 @@ bool BulletSimulation::robotHasCollision(Index robot_idx) const {
     }
   }
   return false;
+}
+
+// This function returns the contact location of the robot with the ground
+void BulletSimulation::getRobotWorldContact(Index robot_idx, Ref<VectorX> loc) const {
+  const Robot *robot = robot_wrappers_[robot_idx].robot_.get();
+  int manifold_count = dispatcher_->getNumManifolds();
+  int n_contact = 8;
+  loc = VectorX::Zero(3*n_contact);
+  int counter = 0;
+  for (int i = 0; i < manifold_count; ++i) {
+    if (counter >= n_contact) {
+        break;
+    }
+    const btPersistentManifold *manifold =
+        dispatcher_->getManifoldByIndexInternal(i);
+    if (manifold->getBody0()->getUserPointer() == robot ||
+        manifold->getBody1()->getUserPointer() == robot) {
+        // Contact involves exactly one of the robot's bodies
+        if (manifold->getNumContacts() > 0) {
+            // in this part, we get the contact point of the manifold
+            const btManifoldPoint &manifold_point = manifold->getContactPoint(0);
+            btVector3 pos;
+            pos = manifold_point.getPositionWorldOnA();
+            Vector3 tmp_pos = eigenVector3FromBullet(pos);
+            for (int j = 0; j < 3; j++) {
+                loc[counter * 3 + j] = tmp_pos[j];
+            }
+            counter++;
+        }
+    }
+  }
 }
 
 Scalar BulletSimulation::getTimeStep() const { return time_step_; }

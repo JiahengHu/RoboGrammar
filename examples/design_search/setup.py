@@ -9,7 +9,7 @@ setup(
     version='0.1.0',
     packages=['design_search'],
     package_dir={'design_search': '..'},
-    install_requires=[
-        'numpy >= 1.21'
-    ]
+    # install_requires=[
+    #     'numpy == 1.19'
+    # ]
 )
